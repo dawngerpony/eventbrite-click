@@ -1,0 +1,2 @@
+simplejson==3.7.3
+requests==2.9.1
