@@ -2,6 +2,7 @@
 
 private.md
 
+.venv/
 .env/
 .idea/
 envvars.bash
