@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 import argparse
+import datetime
 import eventbrite
 import os
 import logging
 import report
 import simplejson
-from flask import Flask
+import time
+
+from flask import Flask, jsonify
 
 
 ENVVAR_EVENTBRITE_PERSONAL_OAUTH_TOKEN = "EVENTBRITE_PERSONAL_OAUTH_TOKEN"
@@ -50,18 +53,36 @@ def hello():
 
 def click_report(cfg):
     client = eventbrite.EventbriteClient(cfg['auth_token'])
+    start = time.time()
     attendee_data = client.get_event_attendees(cfg['event_id'])
-    logging.debug(simplejson.dumps(attendee_data, indent=2))
+    # logging.debug(simplejson.dumps(attendee_data, indent=2))
     num_attendees = len(attendee_data)
-    people_who_were_checked_in = [x for x in attendee_data if x['checked_in'] is True]
-    num_checked_in = len([x['checked_in'] for x in attendee_data if x['checked_in'] is True])
+    # people_who_were_checked_in = [x for x in attendee_data if x['checked_in'] is True]
+    ticket_class_map = client.get_ticket_class_map(cfg['event_id'])
+    checked_in_attendees = [x['checked_in'] for x in attendee_data if x['checked_in'] is True]
+    num_checked_in = len(checked_in_attendees)
+    adult_ticket_classes = [c['id'] for c in ticket_class_map if "adult" in c['name'].lower()]
+    car_ticket_classes = [c['id'] for c in ticket_class_map if "car" in c['name'].lower()]
+    adults_checked_in = [x['checked_in'] for x in attendee_data
+                         if x['checked_in'] is True
+                         and x['ticket_class_id'] in adult_ticket_classes]
+    cars_checked_in = [x['checked_in'] for x in attendee_data
+                       if x['checked_in'] is True
+                       and x['ticket_class_id'] in car_ticket_classes]
+    done = time.time()
+    elapsed = done - start
     return {
+        'timestamp': datetime.datetime.utcnow().isoformat("T") + "Z",
+        'elapsed_seconds': elapsed,
         'num_attendees': num_attendees,
+        'num_adults_checked_in': len(adults_checked_in),
+        'num_cars_checked_in': len(cars_checked_in),
+        # 'event': client.get_event(cfg['event_id']),
+        # 'ticket_classes': client.get_ticket_classes(cfg['event_id']),
         # 'people_who_were_checked_in': people_who_were_checked_in,
         # 'attendees': attendee_data['attendees'],
         'num_checked_in': num_checked_in
     }
-
 
 def parse_args():
     parser = argparse.ArgumentParser()

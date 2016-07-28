@@ -27,6 +27,7 @@ class CachingHttpClient:
             else:
                 return self._cache_store(cache_key, requests.get(url).json())
         else:
+            logging.debug("Retrieving url='{}'".format(url))
             return requests.get(url).json()
 
     def _cache_store(self, key, data):

@@ -28,7 +28,18 @@ class EventbriteClient():
     def get_event(self, event_id):
         return self._get("events/{}".format(event_id))
 
+    def get_ticket_classes(self, event_id):
+        return self._get("events/{}/ticket_classes/".format(event_id))
+
+    def get_ticket_class_map(self, event_id):
+        ticket_classes = self.get_ticket_classes(event_id)
+        m = {}
+        classes = [{'id': t['id'], 'name': t['name']} for t in ticket_classes['ticket_classes']]
+        return classes
+
     def get_event_attendees(self, event_id):
+        ticket_class_map = self.get_ticket_class_map(event_id)
+        logging.debug(ticket_class_map)
         page1 = self._get("events/{}/attendees".format(event_id, 1))
         num_pages = page1['pagination']['page_count']
         # num_pages = 3 # for dev
@@ -45,7 +56,7 @@ class EventbriteClient():
     def _get(self, path, page=1):
         url = "{}/{}?token={}&page={}".format(self.base_url, path, self.token, page)
         logging.debug(url)
-        return self.http_client.get(url)
+        return self.http_client.get(url, use_cache=False)
 
     # def _get(self, path, use_cache=True):
     #     """ Get object from the API, using the cache if possible.
