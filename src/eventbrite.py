@@ -1,5 +1,6 @@
 # Eventbrite API client
 import http
+import http_multi
 import logging
 
 
@@ -42,18 +43,30 @@ class EventbriteClient():
         logging.debug(ticket_class_map)
         page1 = self._get("events/{}/attendees".format(event_id, 1))
         num_pages = page1['pagination']['page_count']
-        # num_pages = 3 # for dev
+        # num_pages = 10 # for dev
         pages = [page1]
-        for i in range(2, num_pages):
-            data = self._get("events/{}/attendees".format(event_id, page=i))
-            pages.append(data)
-        logging.debug("len(pages)={}".format(len(pages)))
+        path = "events/{}/attendees".format(event_id)
+        urls = self._build_urls(path, 2, num_pages)
+        # for i in range(2, num_pages):
+        #     data = self._get("events/{}/attendees".format(event_id))
+        #     pages.append(data)
+        # logging.debug("len(pages)={}".format(len(pages)))
+        responses = http_multi.get_multi(urls)
+        logging.debug(responses)
         attendees = []
         for p in pages:
             attendees += p['attendees']
         return attendees
 
-    def _get(self, path, page=1):
+    def _build_urls(self, path, start_page=1, end_page=1):
+        urls = []
+        for i in range(start_page, end_page):
+            url = "{}/{}?token={}&page={}".format(self.base_url, path, self.token, i)
+            urls.append(url)
+        return urls
+
+
+    def _get(self, path, page=1, use_multi=False):
         url = "{}/{}?token={}&page={}".format(self.base_url, path, self.token, page)
         logging.debug(url)
         return self.http_client.get(url, use_cache=False)
