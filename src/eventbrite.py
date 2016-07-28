@@ -29,10 +29,22 @@ class EventbriteClient():
         return self._get("events/{}".format(event_id))
 
     def get_event_attendees(self, event_id):
-        return self._get("events/{}/attendees".format(event_id))
+        page1 = self._get("events/{}/attendees".format(event_id, 1))
+        num_pages = page1['pagination']['page_count']
+        # num_pages = 3 # for dev
+        pages = [page1]
+        for i in range(2, num_pages):
+            data = self._get("events/{}/attendees".format(event_id, page=i))
+            pages.append(data)
+        logging.debug("len(pages)={}".format(len(pages)))
+        attendees = []
+        for p in pages:
+            attendees += p['attendees']
+        return attendees
 
-    def _get(self, path):
-        url = "{}/{}?token={}".format(self.base_url, path, self.token)
+    def _get(self, path, page=1):
+        url = "{}/{}?token={}&page={}".format(self.base_url, path, self.token, page)
+        logging.debug(url)
         return self.http_client.get(url)
 
     # def _get(self, path, use_cache=True):

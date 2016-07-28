@@ -45,10 +45,22 @@ def run():
 def hello():
     logging.debug("hello()")
     config = load_config()
-    # client = eventbrite.EventbriteClient('test')
-    # logging.debug("OAuth token: {}".format(config['auth_token']))
-    client = eventbrite.EventbriteClient(config['auth_token'])
-    return simplejson.dumps(client.get_users_me())
+    return simplejson.dumps(click_report(config))
+
+
+def click_report(cfg):
+    client = eventbrite.EventbriteClient(cfg['auth_token'])
+    attendee_data = client.get_event_attendees(cfg['event_id'])
+    logging.debug(simplejson.dumps(attendee_data, indent=2))
+    num_attendees = len(attendee_data)
+    people_who_were_checked_in = [x for x in attendee_data if x['checked_in'] is True]
+    num_checked_in = len([x['checked_in'] for x in attendee_data if x['checked_in'] is True])
+    return {
+        'num_attendees': num_attendees,
+        # 'people_who_were_checked_in': people_who_were_checked_in,
+        # 'attendees': attendee_data['attendees'],
+        'num_checked_in': num_checked_in
+    }
 
 
 def parse_args():
