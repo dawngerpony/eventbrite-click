@@ -2,6 +2,7 @@
 import http
 import logging
 
+
 class EventbriteClient():
 
     base_url = "https://www.eventbriteapi.com/v3"
@@ -11,6 +12,7 @@ class EventbriteClient():
     http_client = None
 
     def __init__(self, token, base_url=None):
+        logging.debug("EventbriteClient __init__")
         if base_url:
             self.base_url = base_url
         self.token = token

@@ -3,7 +3,7 @@
 private.md
 
 .venv/
-.env/
+.env
 .idea/
 envvars.bash
 output.txt

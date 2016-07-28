@@ -29,10 +29,12 @@ Deployment
 * https://dashboard.heroku.com/apps/ciaff-eventbrite-click
 
 
-App is connected to GitHub so a deploy to `master` will deploy to Heroku:
+1. App is connected to GitHub so a deploy to `master` will deploy to Heroku:
 
         git checkout master
         git push origin
+
+2. View the build from Heroku's [Activity](https://dashboard.heroku.com/apps/ciaff-eventbrite-click/activity) page.
 
 Useful Commands
 ---------------

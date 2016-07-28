@@ -4,6 +4,7 @@ import eventbrite
 import os
 import logging
 import report
+import simplejson
 from flask import Flask
 
 
@@ -16,19 +17,22 @@ app = Flask(__name__)
 
 def load_config():
     logging.debug("load_config()")
-    return {
+    # in_heroku = (os.getenv(ENVVAR_HEROKU_PORT, '') != '')
+    # logging.debug("in_heroku: {}".format(in_heroku))
+    c = {
         'auth_token': os.getenv(ENVVAR_EVENTBRITE_PERSONAL_OAUTH_TOKEN),
         'event_id':   os.getenv(ENVVAR_EVENTBRITE_EVENT_ID),
         'port':       int(os.getenv(ENVVAR_HEROKU_PORT, '5000')),
         'base_url':   'https://www.eventbriteapi.com/v3'
     }
+    return c
 
 
 def run():
     logging.debug("run()")
     config = load_config()
     # args = parse_args()
-    client = eventbrite.EventbriteClient(config['auth_token'])
+
     # logging.debug(config)
     app.run(host='0.0.0.0', port=config['port'])
     # report.print_click_report(client, args.eventId)
@@ -39,7 +43,12 @@ def run():
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    logging.debug("hello()")
+    config = load_config()
+    # client = eventbrite.EventbriteClient('test')
+    # logging.debug("OAuth token: {}".format(config['auth_token']))
+    client = eventbrite.EventbriteClient(config['auth_token'])
+    return simplejson.dumps(client.get_users_me())
 
 
 def parse_args():
