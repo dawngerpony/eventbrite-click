@@ -1,4 +1,9 @@
-.idea
+*.testdata.json
+
+private.md
+
+.env/
+.idea/
 envvars.bash
 output.txt
 
