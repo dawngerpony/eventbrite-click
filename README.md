@@ -3,6 +3,8 @@ eventbrite-click
 
 Generates a "click" - total of how many people are at an Eventbrite event.
 
+Uses the [Flask](http://flask.pocoo.org/) web microframework.
+
 
 Running it
 ----------
@@ -12,10 +14,12 @@ Running it
 1. Create `envvars.bash`: `cp envvars-example.bash envvars.bash`
 1. Create a virtualenv:
 
-        virtualenv .env
-        . .env/bin/activate
+        virtualenv .venv
+        source .venv/bin/activate
 
-1. Run the program: `./run.bash`
+1. Run the program:
+
+        heroku local web
 
 
 Deployment
@@ -34,6 +38,10 @@ Useful Commands
 ---------------
 
     heroku logs --tail
+
+    heroku ps
+
+    heroku ps:scale web=1
 
 
 Notes
