@@ -14,6 +14,9 @@ from flask import Flask, jsonify
 ENVVAR_EVENTBRITE_PERSONAL_OAUTH_TOKEN = "EVENTBRITE_PERSONAL_OAUTH_TOKEN"
 ENVVAR_EVENTBRITE_EVENT_ID = "EVENTBRITE_EVENT_ID"
 ENVVAR_HEROKU_PORT = "PORT"
+ENVVAR_EVENTBRITE_DEV_MODE = "EVENTBRITE_DEV_MODE"
+ENVVAR_SENDGRID_USERNAME = "SENDGRID_USERNAME"
+ENVVAR_SENDGRID_PASSWORD = "SENDGRID_PASSWORD"
 
 app = Flask(__name__)
 
@@ -23,25 +26,25 @@ def load_config():
     # in_heroku = (os.getenv(ENVVAR_HEROKU_PORT, '') != '')
     # logging.debug("in_heroku: {}".format(in_heroku))
     c = {
-        'auth_token': os.getenv(ENVVAR_EVENTBRITE_PERSONAL_OAUTH_TOKEN),
-        'event_id':   os.getenv(ENVVAR_EVENTBRITE_EVENT_ID),
-        'port':       int(os.getenv(ENVVAR_HEROKU_PORT, '5000')),
-        'base_url':   'https://www.eventbriteapi.com/v3'
+        'dev_mode':          os.getenv(ENVVAR_EVENTBRITE_DEV_MODE),
+        'auth_token':        os.getenv(ENVVAR_EVENTBRITE_PERSONAL_OAUTH_TOKEN),
+        'event_id':          os.getenv(ENVVAR_EVENTBRITE_EVENT_ID),
+        'sendgrid_username': os.getenv(ENVVAR_SENDGRID_USERNAME),
+        'sendgrid_password': os.getenv(ENVVAR_SENDGRID_PASSWORD),
+        'port':              int(os.getenv(ENVVAR_HEROKU_PORT, '5000')),
+        'base_url':          'https://www.eventbriteapi.com/v3'
     }
     return c
 
 
-def run():
+def run(args):
     logging.debug("run()")
     config = load_config()
-    # args = parse_args()
 
-    # logging.debug(config)
-    app.run(host='0.0.0.0', port=config['port'])
-    # report.print_click_report(client, args.eventId)
-    # print simplejson.dumps(client.get_users_me())
-    # print simplejson.dumps(client.get_users_me_owned_events())
-    # print simplejson.dumps(client.get_event_attendees(args.eventId))
+    if args.dev is True:
+        app.run(host='127.0.0.1', port=config['port'])
+    else:
+        app.run(host='0.0.0.0', port=config['port'])
 
 
 @app.route("/")
@@ -55,7 +58,6 @@ def click_report(cfg):
     client = eventbrite.EventbriteClient(cfg['auth_token'])
     start = time.time()
     attendee_data = client.get_event_attendees(cfg['event_id'])
-    # logging.debug(simplejson.dumps(attendee_data, indent=2))
     num_attendees = len(attendee_data)
     # people_who_were_checked_in = [x for x in attendee_data if x['checked_in'] is True]
     ticket_class_map = client.get_ticket_class_map(cfg['event_id'])
@@ -84,9 +86,11 @@ def click_report(cfg):
         'num_checked_in': num_checked_in
     }
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("eventId", help="event ID")
+    # parser.add_argument("eventId", help="event ID")
+    parser.add_argument("--dev", default=False, action="store_true")
     args = parser.parse_args()
     return args
 
@@ -94,4 +98,4 @@ if __name__ == "__main__":
     # logging.basicConfig(filename='example.log', level=logging.DEBUG)
     logging.basicConfig(level=logging.DEBUG)
     logging.debug("eventbrite-click")
-    run()
+    run(parse_args())

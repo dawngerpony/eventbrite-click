@@ -41,12 +41,12 @@ class EventbriteClient():
     def get_event_attendees(self, event_id):
         ticket_class_map = self.get_ticket_class_map(event_id)
         logging.debug(ticket_class_map)
-        page1 = self._get("events/{}/attendees".format(event_id, 1))
+        page1 = self._get("events/{}/attendees/".format(event_id, 1))
         num_pages = page1['pagination']['page_count']
         # num_pages = 10 # for dev
         pages = [page1]
         path = "events/{}/attendees".format(event_id)
-        urls = self._build_urls(path, 2, num_pages)
+        urls = self._build_urls(path, start_page=2, end_page=num_pages)
         # for i in range(2, num_pages):
         #     data = self._get("events/{}/attendees".format(event_id))
         #     pages.append(data)
@@ -56,13 +56,16 @@ class EventbriteClient():
         attendees = []
         for p in pages:
             attendees += p['attendees']
+        logging.debug('pages={}'.format(len(pages)))
         return attendees
 
     def _build_urls(self, path, start_page=1, end_page=1):
         urls = []
+        logging.debug('start_page={} end_page={}'.format(start_page, end_page))
         for i in range(start_page, end_page):
             url = "{}/{}?token={}&page={}".format(self.base_url, path, self.token, i)
             urls.append(url)
+        logging.debug('urls={}'.format(len(urls)))
         return urls
 
 

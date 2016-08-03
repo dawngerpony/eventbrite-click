@@ -36,6 +36,7 @@ Deployment
 
 2. View the build from Heroku's [Activity](https://dashboard.heroku.com/apps/ciaff-eventbrite-click/activity) page.
 
+
 Useful Commands
 ---------------
 
@@ -44,6 +45,21 @@ Useful Commands
     heroku ps
 
     heroku ps:scale web=1
+
+
+Database
+--------
+
+* https://www.mlab.com/databases/heroku_h5cf0v6g 
+* https://elements.heroku.com/addons/mongolab
+* https://docs.mongodb.com/getting-started/python/
+* https://cloud.mongodb.com - not using this 
+
+
+Email
+-----
+
+* https://github.com/sendgrid/sendgrid-python
 
 
 Notes

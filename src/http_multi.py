@@ -1,4 +1,5 @@
 import grequests
+import socket
 
 
 def exception_handler(request, exception):
@@ -7,4 +8,7 @@ def exception_handler(request, exception):
 
 def get_multi(urls):
     rs = (grequests.get(u) for u in urls)
-    return grequests.map(rs, size=10, exception_handler=exception_handler)
+    try:
+        return grequests.map(rs, size=25, exception_handler=exception_handler)
+    except socket.error, e:
+        print "Socket error!"
