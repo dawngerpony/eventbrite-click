@@ -1,5 +1,5 @@
-web: python src/main.py
+web: python ebclick/main.py
 
-dev: python src/main.py --dev
+dev: python ebclick/main.py --dev
 
-email: python src/eb_email.py
+email: python ebclick/eb_email.py

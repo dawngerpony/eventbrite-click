@@ -55,9 +55,10 @@ def hello():
 
 
 def click_report(cfg):
-    client = eventbrite.EventbriteClient(cfg['auth_token'])
+    client = eventbrite.EventbriteClient(cfg['auth_token'], cache_to_disk=True)
     start = time.time()
     attendee_data = client.get_event_attendees(cfg['event_id'])
+    return {}
     num_attendees = len(attendee_data)
     # people_who_were_checked_in = [x for x in attendee_data if x['checked_in'] is True]
     ticket_class_map = client.get_ticket_class_map(cfg['event_id'])
@@ -83,7 +84,8 @@ def click_report(cfg):
         # 'ticket_classes': client.get_ticket_classes(cfg['event_id']),
         # 'people_who_were_checked_in': people_who_were_checked_in,
         # 'attendees': attendee_data['attendees'],
-        'num_checked_in': num_checked_in
+        'num_checked_in': num_checked_in,
+        'pages': 0
     }
 
 

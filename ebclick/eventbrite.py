@@ -2,21 +2,34 @@
 import http
 import http_multi
 import logging
+import pickle
+import time
 
 
-class EventbriteClient():
+def write_responses_data(data):
+    """ Write a list of HTTP response data to disk using pickle,
+        for the purpose of automated testing and offline development.
+    """
+    filename = 'data_{}.requests.models.Response.p'.format(time.time())
+    with open(filename, 'wb') as f:
+        pickle.dump(data, f)
+
+
+class EventbriteClient:
 
     base_url = "https://www.eventbriteapi.com/v3"
     token = None
     cache_filename = "/tmp/eventbrite.cache"
     cache = None
     http_client = None
+    cache_to_disk = False
 
-    def __init__(self, token, base_url=None):
+    def __init__(self, token, base_url=None, cache_to_disk=False):
         logging.debug("EventbriteClient __init__")
         if base_url:
             self.base_url = base_url
         self.token = token
+        self.cache_to_disk = cache_to_disk
         # self.cache = shelve.open(self.cache_filename)
         self.http_client = http.CachingHttpClient()
 
@@ -39,24 +52,23 @@ class EventbriteClient():
         return classes
 
     def get_event_attendees(self, event_id):
+        attendees_path_prefix = "events/{}/attendees/".format(event_id)
         ticket_class_map = self.get_ticket_class_map(event_id)
         logging.debug(ticket_class_map)
-        page1 = self._get("events/{}/attendees/".format(event_id, 1))
+        page1 = self._get(attendees_path_prefix, page=1)
         num_pages = page1['pagination']['page_count']
-        # num_pages = 10 # for dev
-        pages = [page1]
-        path = "events/{}/attendees".format(event_id)
-        urls = self._build_urls(path, start_page=2, end_page=num_pages)
-        # for i in range(2, num_pages):
-        #     data = self._get("events/{}/attendees".format(event_id))
-        #     pages.append(data)
-        # logging.debug("len(pages)={}".format(len(pages)))
+        # num_pages = 2 # for dev
+        # pages = [page1]
+        urls = self._build_urls(attendees_path_prefix, start_page=2, end_page=num_pages)
         responses = http_multi.get_multi(urls)
-        logging.debug(responses)
+        if self.cache_to_disk is True:
+            write_responses_data(responses)
+        # attendee_data = AttendeeData(responses)
+        # logging.debug(responses)
         attendees = []
-        for p in pages:
-            attendees += p['attendees']
-        logging.debug('pages={}'.format(len(pages)))
+        # for p in pages:
+        #     attendees += p['attendees']
+        # logging.debug('pages={}'.format(len(pages)))
         return attendees
 
     def _build_urls(self, path, start_page=1, end_page=1):
@@ -68,8 +80,7 @@ class EventbriteClient():
         logging.debug('urls={}'.format(len(urls)))
         return urls
 
-
-    def _get(self, path, page=1, use_multi=False):
+    def _get(self, path, page=1):
         url = "{}/{}?token={}&page={}".format(self.base_url, path, self.token, page)
         logging.debug(url)
         return self.http_client.get(url, use_cache=False)
@@ -97,3 +108,37 @@ class EventbriteClient():
         """
         self.cache[self._cache_key(suffix)] = data
         return data
+
+
+class AttendeeData:
+
+    pages = []
+    attendees = []
+    responses = []
+    timestamp = None
+
+    def __init__(self, responses):
+        self.responses = responses
+        # for r in responses:
+        #     print(r)
+
+    def total_checked_in(self):
+        """ Return a total of the attendees that have been checked in. Includes all ticket types.
+        """
+        # TODO Finish this.
+        return 0
+
+    def total_human_attendees(self):
+        """ Return the total number of attendees, including all ticket types.
+        """
+        # TODO Finish this.
+        return 0
+
+    def percentage_humans_checked_in(self):
+        """ Return a tuple of:
+                - 1: the number of humans attending the event
+                - 2: the number of humans that have been checked in to the event
+                - 3: for convenience, the percentage of humans out of the total
+        """
+        # TODO Finish this.
+        return (0, 0, 0)

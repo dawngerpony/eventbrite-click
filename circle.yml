@@ -1,0 +1,4 @@
+test:
+  override:
+    nose2
+    mv nose2-junit.xml $CIRCLE_TEST_RESULTS/

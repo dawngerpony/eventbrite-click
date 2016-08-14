@@ -65,4 +65,20 @@ Email
 Notes
 -----
 
-    virtualenvwrapper
+* The folder structure is based on [Learn Python The Hard Way Exercise 46: A Project Skeleton](http://learnpythonthehardway.org/book/ex46.html).
+* The build was configured to work with CircleCI via [Continuous Integration and Continuous Deployment with Python](https://circleci.com/docs/language-python/).
+
+
+Resources
+---------
+
+The following resources were used (but not harmed) in the making of this program:
+
+* https://github.com/valermor/nose2-tests-recipes - great nose2 examples
+* https://discuss.circleci.com/t/junit-reporting-with-nose2/1601
+
+To read
+-------
+
+* https://circleci.com/docs/continuous-deployment-with-heroku/
+* `virtualenvwrapper` - worth looking into.
